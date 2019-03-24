@@ -1,0 +1,43 @@
+language: node_js
+node_js:
+  - 10.15.3
+
+install:
+  - npm i
+
+script:
+  - npm test
+
+before_deploy:
+  - if ["$TRAVIS_PULL_REQUEST" == "true"]; then exit 0; fi
+  - zip -r -q pair-goal-chatting *
+  - mkdir -p deploy
+  - mv pair-goal-chatting.zip deploy/pair-goal-chatting.zip
+
+deploy:
+  - provider: s3
+    local_dir: deploy
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: pair-goal-travis
+    region: ap-northeast-2
+    skip_cleanup: true 
+    acl: public_read
+    wait-until-deployed: true
+    on:
+      repo: pair-goal/chatting-backend
+      branch: master
+
+  - provider: codedeploy
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key: $AWS_SECRET_KEY
+    bucket: pair-goal-travis 
+    key: pair-goal-chatting.zip
+    bundle_type: zip
+    application: travis-codeDeploy-service
+    deployment_group: travis-codeDeploy-group
+    region: ap-northeast-2
+    wait-until-deployed: true
+    on:
+      repo: pair-goal/chatting-backend
+      branch: master

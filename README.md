@@ -1,4 +1,5 @@
 # pair-goal
+[![Build Status](https://travis-ci.org/pair-goal/chatting-backend.svg?branch=master)](https://travis-ci.org/pair-goal/chatting-backend)
 
 ## 사용 기술
 - Ruby on Rails

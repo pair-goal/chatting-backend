@@ -1,0 +1,9 @@
+version: 0.0
+os: linux
+files:
+  - source:  /
+    destination: /home/ubuntu/chatting-deploy
+hooks:
+  AfterInstall:
+    - location: script/deploy.sh
+      timeout: 1800
