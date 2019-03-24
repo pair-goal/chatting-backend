@@ -5,5 +5,5 @@ files:
     destination: /home/ubuntu/chatting-deploy
 hooks:
   AfterInstall:
-    - location: script/deploy.sh
+    - location: ./script/deploy.sh
       timeout: 1800
