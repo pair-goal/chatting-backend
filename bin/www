@@ -18,7 +18,9 @@ const port = normalizePort(process.env.PORT || '3000');
  */
 
 const server = http.createServer();
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+  'logger': require('../util/logger'),
+});
 require('../app')(io);
 
 /**
