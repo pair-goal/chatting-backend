@@ -15,7 +15,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true })
 
 const io = io => {
   io.on('connection', socket => {
-    socket.on('sendMessage');
+    
   });
 };
 
