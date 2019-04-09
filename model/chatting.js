@@ -9,6 +9,7 @@ const userSchema = new Schema({
 const conversationSchema = new Schema({
   participants: { type: [{
       nickname: { type: String, required: true, },
+      title: { type: String, required: true, },
     }], default: [],
   },
 });
