@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const userSchema = new Schema({
+  nickname: { type: String, required: true },
+  conversations: { type: [Schema.Types.ObjectId], default: [] },
+});
+
 const conversationSchema = new Schema({
   participants: { type: [{
-                  nickname: { type: String, required: true, },
-                }], default: [],
+      nickname: { type: String, required: true, },
+      title: { type: String, required: true, },
+    }], default: [],
   },
 });
 
@@ -16,6 +22,7 @@ const messageSchema = new Schema({
 });
 
 module.exports = {
+  user: mongoose.model('user', userSchema),
   conversation: mongoose.model('conversation', conversationSchema),
   message: mongoose.model('message', messageSchema),
 };
