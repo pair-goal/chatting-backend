@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
+const socketio = require('./util/socket');
 const logger= require('./util/logger');
-const Redis = require('ioredis');
-const redisClient = new Redis(6379, process.env.REDIS_URI);
+require('./util/redis');
 require('dotenv').config();
 
 mongoose.Promise = global.Promise;
@@ -11,7 +11,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true })
 
 const io = io => {
   io.on('connection', socket => {
-
+    socketio.init(socket);
   });
 };
 
