@@ -1,10 +1,8 @@
 const mongoose = require('mongoose');
 const logger= require('./util/logger');
-require('./util/redis');
+const Redis = require('ioredis');
+const redisClient = new Redis(6379, process.env.REDIS_URI);
 require('dotenv').config();
-
-if(process.env.NODE_ENV == 'development')
-  process.env.REDIS_URI = 'localhost'
 
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true })
@@ -13,7 +11,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true })
 
 const io = io => {
   io.on('connection', socket => {
-    
+    redisClient.get('foo').then(result => console.log(result)).catch(e => console.log(e));
   });
 };
 

@@ -1,24 +1,28 @@
-const redis = require('redis')
+const Redis = require('ioredis');
 const logger= require('../util/logger');
-const redisClient = redis.createClient(6379, process.env.REDIS_URI);
+const chatting = require('../model/chatting');
+const redisClient = new Redis(6379, process.env.REDIS_URI);
 
-const User = require('../model/chatting').user;
-const Conversation = require('../model/chatting').conversation;
+const User = chatting.user;
+const Conversation = chatting.conversation;
 
 redisClient.subscribe('newConversation');
 
 redisClient.on('message', (channel, data) => {
-  if(channel === "newConversation")
-    newConversation(data);
+  const jsonData = JSON.parse(data);
+
+  if(channel === 'newConversation')
+    newConversation(jsonData);
+  if(channel === 'sendMessage')
+    sendMessage(jsonData);
 });
 
 async function newConversation(data) {
-  const jsonData = JSON.parse(data);
   const participants = [];
 
   logger.info(`newConversation - ${data}`);
 
-  jsonData.forEach(v => {
+  data.forEach(v => {
     const participant = {
       nickname: v.nickname,
       title: v.title,
@@ -35,7 +39,7 @@ async function newConversation(data) {
     const conversation = await newConversation.save();
     const conversationId = conversation._id;
 
-    jsonData.forEach(async v => {
+    data.forEach(async v => {
       try {
         const userNickname = v.nickname;
         const count = await User.countDocuments().where('nickname').equals(userNickname);
