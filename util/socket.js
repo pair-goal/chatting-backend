@@ -1,5 +1,3 @@
-const Redis = require('ioredis');
-const redisClient = new Redis(6379, process.env.REDIS_URI);
 const logger = require('../util/logger');
 
 const User = require('../model/chatting').user;
@@ -13,6 +11,7 @@ const init = async socket => {
       return;
 
     user.conversations.forEach(v => {
+      socket.nickname = nickname;
       socket.join(v);
     });
   } catch (e) {

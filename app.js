@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const socketio = require('./util/socket');
 const logger= require('./util/logger');
-require('./util/redis');
 require('dotenv').config();
 
 mongoose.Promise = global.Promise;

@@ -22,6 +22,7 @@ const io = require('socket.io')(server, {
   'logger': require('../util/logger'),
 });
 require('../app')(io);
+require('../util/redis')(io);
 
 /**
  * Listen on provided port, on all network interfaces.
