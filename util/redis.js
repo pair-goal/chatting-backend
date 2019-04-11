@@ -72,10 +72,10 @@ module.exports = io => {
 
   async function sendMessage(data) {
     const {id, content, nickname} = data;
-    const roomClients = io.sockets.clients(id);
+    const roomClients = await io.of('/').in(id).clients();
 
     try {
-      newMessage = new Message({
+      const newMessage = new Message({
         conversation_id: id,
         sender: nickname,
         content,

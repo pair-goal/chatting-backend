@@ -19,7 +19,7 @@ const init = async socket => {
   }
 };
 
-const sendMessage = callback => {
+const sendMessage = (data, callback) => {
   callback();
 };
 
