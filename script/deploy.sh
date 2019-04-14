@@ -3,8 +3,8 @@
 cp /home/ubuntu/.env /home/ubuntu/chatting-deploy/.env 
 cd /home/ubuntu/chatting-deploy
 
-if [ "$(docker ps | grep "app-chatting")" != "" ]; then
-  docker rm -f $(docker ps | grep "app-chatting")
+if [ "$(docker ps -a | grep "app-chatting")" != "" ]; then
+  docker rm -f $(docker ps -a | grep "app-chatting")
 fi
 if [ "$(docker images | grep "app-chatting")" != "" ]; then
   docker rmi -f $(docker images | grep "app-chatting")
