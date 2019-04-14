@@ -22,9 +22,9 @@ module.exports = io => {
   });
 
   async function newConversation(data) {
-    const participants = [];
+    logger.info(`newConversation - ${JSON.stringify(data)}`);
 
-    logger.info(`newConversation - ${data}`);
+    const participants = [];
 
     data.forEach(v => {
       const participant = {
@@ -71,6 +71,8 @@ module.exports = io => {
   }
 
   async function sendMessage(data) {
+    logger.info(`newConversation - ${JSON.stringify(data)}`);
+
     const {id, content, nickname} = data;
     const roomClients = await io.of('/').in(id).clients();
 
@@ -88,9 +90,9 @@ module.exports = io => {
         await redisClient.hmset(message._id, 'content', message.content, 'created_at', message.created_at);
 
         if(roomClients[0].nickname === nickname)
-          io.to(roomClients[1].id).emit('sendMessage');
+          io.to(roomClients[1].id).emit('sendMessage', {chtting_id: message._id});
         else
-          io.to(roomClients[0].id).emit('sendMessage');
+          io.to(roomClients[0].id).emit('sendMessage', {chtting_id: message._id});
       }
     } catch (e) {
       logger.error(e.stack);
