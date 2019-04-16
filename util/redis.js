@@ -1,5 +1,6 @@
 module.exports = io => {
   const Redis = require('ioredis');
+  const mongoose = require('mongoose');
   const logger= require('../util/logger');
   const chatting = require('../model/chatting');
   const redisClient = new Redis(6379, process.env.REDIS_URI);
@@ -78,7 +79,7 @@ module.exports = io => {
 
     try {
       const newMessage = new Message({
-        conversation_id: id,
+        conversation_id: mongoose.Types.ObjectId(id),
         sender: nickname,
         content,
       });
