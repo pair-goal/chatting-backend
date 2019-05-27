@@ -10,19 +10,37 @@ module.exports = io => {
   const Conversation = chatting.conversation;
   const Message = chatting.message;
 
+  redisSub.subscribe('newUser');
   redisSub.subscribe('newConversation');
   redisSub.subscribe('sendMessage');
 
   redisSub.on('message', (channel, data) => {
     const jsonData = JSON.parse(data);
 
+    if(channel === 'newUser')
+      newUser(jsonData);
     if(channel === 'newConversation')
       newConversation(jsonData);
     if(channel === 'sendMessage')
       sendMessage(jsonData);
   });
 
-  async function newConversation(data) {
+  const newUser = async (data) => {
+    const userNickname = data.nickname;
+
+    try {
+      const user = new User({
+        nickname: userNickname,
+        conversations: [],
+      });
+  
+      await user.save();
+    } catch (e) {
+      logger.error(e.stack);
+    }
+  };
+
+  const newConversation = async (data) => {
     logger.info(`newConversation - ${JSON.stringify(data)}`);
 
     const participants = [];
@@ -45,33 +63,19 @@ module.exports = io => {
       const conversationId = conversation._id;
 
       data.forEach(async v => {
-        try {
-          const userNickname = v.nickname;
-          const count = await User.countDocuments().where('nickname').equals(userNickname);
+        const userNickname = v.nickname;
 
-          if(count === 0) {
-            const user = new User({
-              nickname: userNickname,
-              conversations: [conversationId],
-            });
-
-            await user.save();
-          } else {
-            await User.updateOne(
-              { nickname: userNickname },
-              { $push: { conversations: conversationId } }
-            );
-          }
-        } catch (e) {
-          logger.error(e.stack);
-        }
+        await User.updateOne(
+          { nickname: userNickname },
+          { $push: { conversations: conversationId } }
+        );
       });
     } catch (e) {
       logger.error(e.stack);
     }
-  }
+  };
 
-  async function sendMessage(data) {
+  const sendMessage = async (data) => {
     logger.info(`newConversation - ${JSON.stringify(data)}`);
 
     const {id, content, nickname} = data;
@@ -98,5 +102,5 @@ module.exports = io => {
     } catch (e) {
       logger.error(e.stack);
     }
-  }
-}
+  };
+};
