@@ -13,6 +13,7 @@ module.exports = io => {
   redisSub.subscribe('newUser');
   redisSub.subscribe('newConversation');
   redisSub.subscribe('sendMessage');
+  redisSub.subscribe('updateDiary');
 
   redisSub.on('message', (channel, data) => {
     const jsonData = JSON.parse(data);
@@ -23,6 +24,8 @@ module.exports = io => {
       newConversation(jsonData);
     if(channel === 'sendMessage')
       sendMessage(jsonData);
+    if(channel === 'updateDiary')
+      updateDiary(jsonData);
   });
 
   const newUser = async (data) => {
@@ -62,6 +65,11 @@ module.exports = io => {
       const conversation = await newConversation.save();
       const conversationId = conversation._id;
 
+      redisClient.publish('newConversation', {
+        goal_id: v.id,
+        conversation_id: conversationId
+      })
+
       data.forEach(async v => {
         const userNickname = v.nickname;
 
@@ -79,7 +87,6 @@ module.exports = io => {
     logger.info(`newConversation - ${JSON.stringify(data)}`);
 
     const {id, content, nickname} = data;
-    const roomClients = await io.of('/').in(id).clients();
 
     try {
       const newMessage = new Message({
@@ -90,17 +97,35 @@ module.exports = io => {
 
       const message = await newMessage.save();
 
-      if(roomClients.length === 2) {
-        await redisClient.select(2);
-        await redisClient.hmset(message._id, 'content', message.content, 'created_at', message.created_at);
+      io.of('/').in(id).clients(async (err, clients) => {
+        if(err)
+          throw new Error(e);
 
-        if(roomClients[0].nickname === nickname)
-          io.to(roomClients[1].id).emit('sendMessage', {chtting_id: message._id});
-        else
-          io.to(roomClients[0].id).emit('sendMessage', {chtting_id: message._id});
-      }
+        if(clients.length === 2 || (clients.length === 1 && clients[0] !== nickname)) {
+          await redisClient.select(2);
+          await redisClient.hmset(message._id, 'content', message.content,
+            'sender', nickname, 'created_at', message.created_at);
+  
+          if(clients[0] === nickname)
+            io.to(clients[1]).emit('sendMessage', message._id);
+          else
+            io.to(clients[0]).emit('sendMessage', message._id);
+        }
+      });
     } catch (e) {
       logger.error(e.stack);
     }
   };
+
+  const updateDiary = async (data) => {
+    const {id, comment, score, nickname} = data;
+
+    const content = `오늘은 목표를 위해서 열심히 '${comment}' 를 했어요. 오늘 제 점수는 5점 만점에 ${score}점!`;
+
+    sendMessage({
+      id,
+      content,
+      nickname
+    });
+  }
 };
