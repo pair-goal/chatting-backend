@@ -52,6 +52,7 @@ module.exports = io => {
       const participant = {
         nickname: v.nickname,
         title: v.title,
+        goalId: v.id,
       };
 
       participants.push(participant);
@@ -65,10 +66,10 @@ module.exports = io => {
       const conversation = await newConversation.save();
       const conversationId = conversation._id;
 
-      redisClient.publish('newConversation', {
-        goal_id: v.id,
+      redisClient.publish('newConversations', JSON.stringify({
+        participants,
         conversation_id: conversationId
-      })
+      }));
 
       data.forEach(async v => {
         const userNickname = v.nickname;
